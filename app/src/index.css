@@ -868,3 +868,178 @@ pre.code {
   border-radius: 8px;
   font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
 }
+
+/* Face control */
+.delivery-grid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.delivery {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.delivery-target {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.delivery-arc {
+  fill: none;
+  stroke: var(--axis);
+  stroke-width: 1;
+}
+
+.delivery-head {
+  fill: var(--ink);
+}
+
+.delivery-shaft {
+  stroke: var(--ink-2);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.delivery-ball {
+  fill: var(--surface);
+  stroke: var(--ink-2);
+  stroke-width: 1.25;
+}
+
+.delivery-path line,
+.delivery-face line {
+  stroke-width: 4;
+}
+
+.delivery-path {
+  stroke: var(--series);
+  fill: var(--series);
+}
+
+.delivery-face {
+  stroke: var(--highlight);
+  fill: var(--highlight);
+}
+
+.delivery-path polygon,
+.delivery-face polygon {
+  stroke: none;
+}
+
+.delivery-stats {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.delivery-stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+
+.delivery-stats dt {
+  color: var(--ink-2);
+}
+
+.delivery-stats dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.delivery-stats .sd {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.key-arrow {
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.key-path {
+  background: var(--series);
+}
+
+.key-face {
+  background: var(--highlight);
+}
+
+.curve-bar {
+  margin-top: 6px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.curve-title {
+  color: var(--ink-2);
+}
+
+.curve-track {
+  position: relative;
+  height: 22px;
+  margin-top: 2px;
+}
+
+.curve-fill {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  min-width: 2px;
+  background: var(--axis);
+}
+
+/* Arrowhead just past the tip of the bar. */
+.curve-fill::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 7px solid transparent;
+  border-left-width: 9px;
+  border-right-width: 9px;
+}
+
+.curve-fill.right::after {
+  left: 100%;
+  border-right-width: 0;
+  border-left-color: var(--axis);
+}
+
+.curve-fill.left::after {
+  right: 100%;
+  border-left-width: 0;
+  border-right-color: var(--axis);
+}
+
+.curve-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--muted);
+}
+
+.curve-value {
+  position: absolute;
+  top: 0;
+  padding: 0 8px;
+  line-height: 22px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.curve-value .sd {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 11px;
+}

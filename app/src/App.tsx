@@ -7,6 +7,7 @@ import { DEFAULT_FILTERS, type Filters, type Shot, type Tab } from './lib/types'
 import { Dispersion } from './views/Dispersion'
 import { ExportGuide } from './views/ExportGuide'
 import { Explorer } from './views/Explorer'
+import { FaceControl } from './views/FaceControl'
 import { Impact } from './views/Impact'
 import { Overview } from './views/Overview'
 import { Shots } from './views/Shots'
@@ -17,6 +18,7 @@ const TABS: [Tab, string][] = [
   ['overview', 'Overview'],
   ['dispersion', 'Dispersion'],
   ['impact', 'Impact'],
+  ['face', 'Face and path'],
   ['trends', 'Trends'],
   ['explorer', 'Explorer'],
   ['shots', 'Shots'],
@@ -197,6 +199,7 @@ export default function App() {
                     <StrikeCarry shots={filtered} />
                   </div>
                 )}
+                {tab === 'face' && <FaceControl shots={filtered} />}
                 {tab === 'trends' && <Trends shots={filtered} />}
                 {tab === 'explorer' && <Explorer shots={filtered} />}
                 {tab === 'shots' && <Shots shots={filtered} />}

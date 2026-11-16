@@ -47,9 +47,10 @@ Clubs are sorted by loft (Driver → woods → hybrids → irons → wedges). Cl
    - Gapping chart: one row per club, box/strip of carry with total marked, sorted by loft.
 2. **Dispersion** — bird's-eye scatter: one chart per club, x = `carrySide`, y = `carry`, same meters-per-pixel in every chart, ~1σ ellipse + mean.
 3. **Impact** — small multiples, one face per club, real scale in mm. Face shape per club type (driver/wood, hybrid, iron/wedge). Right-handed view from the front: toe left, heel right; driver/woods/hybrids show a shaft stub at the heel. Positive `impactOffset` = toe (inferred from the data: on woods/hybrids it correlates with a leftward spin axis, i.e. the toe gear effect; Trackman docs don't state the sign). Shows mean + 1σ ellipse, and "n of m shots have impact data".
-4. **Trends** — choose club + metric; per-session mean with spread (±SD), sessions evenly spaced in time order (several can share a day).
-5. **Explorer** — choose any two numeric fields for X/Y; one chart per club (shared axes) or all shots combined, with Pearson r.
-6. **Shots** — sortable table of all filtered shots; hovering a row highlights the shot in charts where visible.
+4. **Face and path** — one top-down picture per club (right-handed, target at the top) of the average delivery: arrow for club path (where the head is moving), arrow for face angle (where the face points), both relative to the target line, plus mean ± SD for club path, face angle and face-to-path. Positive = right of target (in-to-out / open); out-to-in and closed values are shown with a minus. Angles are multiplied by one shared factor (max ×5) so a few degrees are visible. Only shots with all three values count. Below the numbers, a bar shows the average `curve` (m, positive = right) of those shots, where measured: it grows left or right from the centre on a scale shared by all clubs, with the figure printed on the opposite side.
+5. **Trends** — choose club + metric; per-session mean with spread (±SD), sessions evenly spaced in time order (several can share a day).
+6. **Explorer** — choose any two numeric fields for X/Y; one chart per club (shared axes) or all shots combined, with Pearson r.
+7. **Shots** — sortable table of all filtered shots; hovering a row highlights the shot in charts where visible.
 
 Every chart tooltip shows: club, session date, carry, club speed, plus the plotted values.
 
