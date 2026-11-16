@@ -36,4 +36,4 @@ export const DEFAULT_FILTERS: Filters = {
   excludeMishits: true,
 }
 
-export type Tab = 'overview' | 'dispersion' | 'impact' | 'face' | 'attack' | 'trends' | 'explorer' | 'shots'
+export type Tab = 'overview' | 'dispersion' | 'impact' | 'face' | 'attack' | 'flight' | 'trends' | 'explorer' | 'shots'

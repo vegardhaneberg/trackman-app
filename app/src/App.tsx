@@ -5,6 +5,7 @@ import { parseTrackmanCsv } from './lib/parse'
 import { applyFilters, sessionsOf } from './lib/stats'
 import { DEFAULT_FILTERS, type Filters, type Shot, type Tab } from './lib/types'
 import { AttackLaunch } from './views/AttackLaunch'
+import { BallFlight } from './views/BallFlight'
 import { Dispersion } from './views/Dispersion'
 import { ExportGuide } from './views/ExportGuide'
 import { Explorer } from './views/Explorer'
@@ -21,6 +22,7 @@ const TABS: [Tab, string][] = [
   ['impact', 'Impact'],
   ['face', 'Face and path'],
   ['attack', 'Attack and launch'],
+  ['flight', 'Ball flight'],
   ['trends', 'Trends'],
   ['explorer', 'Explorer'],
   ['shots', 'Shots'],
@@ -203,6 +205,7 @@ export default function App() {
                 )}
                 {tab === 'face' && <FaceControl shots={filtered} />}
                 {tab === 'attack' && <AttackLaunch shots={filtered} />}
+                {tab === 'flight' && <BallFlight shots={filtered} />}
                 {tab === 'trends' && <Trends shots={filtered} />}
                 {tab === 'explorer' && <Explorer shots={filtered} />}
                 {tab === 'shots' && <Shots shots={filtered} />}
