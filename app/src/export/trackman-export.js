@@ -194,6 +194,19 @@
       }
     }`;
 
+  // `strokes` får et eget alias per aktivitetstype: slagtypene har ulik nullbarhet på samme felt
+  // (f.eks. `time: DateTime` mot `DateTime!`), og da avviser API-et spørringen hvis de deler navn.
+  // normalizeNode() samler dem tilbake til `strokes`.
+  function normalizeNode(node) {
+    if (!node) return null;
+    for (const key of Object.keys(node)) {
+      if (!key.startsWith('strokes_')) continue;
+      if (node[key] != null) node.strokes = node[key];
+      delete node[key];
+    }
+    return node;
+  }
+
   const DETAIL_QUERY = () => `
     query Activity($id: ID!) {
       node(id: $id) {
@@ -201,13 +214,13 @@
         ... on PlayerActivity { id time kind }
         ... on RangePracticeActivity {
           location { name }
-          strokes { time club bayName measurement { ${fields(RANGE_MEAS)} } }
+          strokes_RangePractice: strokes { time club bayName measurement { ${fields(RANGE_MEAS)} } }
         }
         ... on RangeFindMyDistanceActivity {
           location { name }
-          strokes { time club measurement { ${fields(RANGE_MEAS)} } }
+          strokes_RangeFindMyDistance: strokes { time club measurement { ${fields(RANGE_MEAS)} } }
         }
-        ${SESSION_TYPES.map((t) => `... on ${t} { strokes { time club measurement { ${fields(FULL_MEAS)} } } }`).join('\n')}
+        ${SESSION_TYPES.map((t) => `... on ${t} { strokes_${t}: strokes { time club measurement { ${fields(FULL_MEAS)} } } }`).join('\n')}
         ... on CoursePlayActivity {
           gameType grossScore netScore toPar
           course { displayName }
@@ -246,7 +259,7 @@
     const worker = async () => {
       while (todo.length) {
         const id = todo.shift();
-        try { detailCache.set(id, (await gql(DETAIL_QUERY, { id }))?.node || null); }
+        try { detailCache.set(id, normalizeNode((await gql(DETAIL_QUERY, { id }))?.node)); }
         catch (e) { console.warn('[Trackman-eksport] Klarte ikke å hente', id, e); detailCache.set(id, null); }
         onProgress(++done, ids.length);
       }
