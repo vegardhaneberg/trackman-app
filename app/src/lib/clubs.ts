@@ -34,6 +34,25 @@ export function faceType(club: string): FaceType {
   return 'iron'
 }
 
+/**
+ * Typical good attack angle range in degrees (negative = hitting down), by club. Bands built around
+ * Trackman's PGA Tour averages and optimizer assumptions; guidance, not a published standard.
+ */
+export function attackRange(club: string): [number, number] {
+  if (club === 'Driver') return [0, 5]
+  const m = club.match(NUMBERED)
+  if (m?.[2] === 'Wood') return [-4, -1]
+  if (m?.[2] === 'Hybrid') return [-4, -2]
+  if (m?.[2] === 'Iron') {
+    const n = Number(m[1])
+    if (n <= 5) return [-4, -2]
+    return n <= 8 ? [-5, -3] : [-6, -3.5]
+  }
+  if (club === 'PitchingWedge') return [-6, -3.5]
+  if (club.endsWith('Wedge')) return [-7, -4]
+  return [-5, -3]
+}
+
 export function isPutt(shotResult: string, club: string): boolean {
   return shotResult === 'AutoPutt' || club === 'Putter'
 }

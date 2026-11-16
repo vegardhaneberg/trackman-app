@@ -11,6 +11,7 @@
   --series: #2a78d6;
   --series-wash: rgba(42, 120, 214, 0.12);
   --highlight: #eb6834;
+  --good: #2f9e5e;
   --face: #f0efec;
   --error: #d03b3b;
   --radius: 10px;
@@ -31,6 +32,7 @@
     --series: #3987e5;
     --series-wash: rgba(57, 135, 229, 0.16);
     --highlight: #d95926;
+    --good: #3fae6c;
     --face: #262624;
   }
 }
@@ -888,6 +890,29 @@ pre.code {
   stroke-dasharray: 4 4;
 }
 
+.delivery-ground {
+  stroke: var(--axis);
+  stroke-width: 1.5;
+}
+
+.delivery-good {
+  fill: none;
+  stroke: var(--good);
+  stroke-opacity: 0.8;
+  stroke-width: 16;
+}
+
+.delivery-low {
+  fill: var(--ink-2);
+}
+
+.delivery-tee {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
 .delivery-arc {
   fill: none;
   stroke: var(--axis);
@@ -970,6 +995,19 @@ pre.code {
 
 .key-face {
   background: var(--highlight);
+}
+
+.key-good {
+  background: var(--good);
+}
+
+.key-low {
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  border-top-width: 0;
+  border-bottom: 8px solid var(--ink-2);
+  background: none;
 }
 
 .curve-bar {

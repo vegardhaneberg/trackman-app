@@ -1,5 +1,7 @@
 import { ClubDelivery } from '../charts/ClubDelivery'
+import { DeliveryStat } from '../charts/DeliveryStat'
 import { clubLabel, faceType } from '../lib/clubs'
+import { describeSigned } from '../lib/format'
 import { fmtNum } from '../lib/metrics'
 import { byClub, summarize, values, type Summary } from '../lib/stats'
 import type { Shot } from '../lib/types'
@@ -64,16 +66,16 @@ export function FaceControl({ shots }: { shots: Shot[] }) {
             ) : (
               <>
                 <ClubDelivery
-                  ariaLabel={`${clubLabel(c.club)}: club path ${describe(c.path.mean!, 'in-to-out', 'out-to-in', 'neutral')}, face ${describe(c.face.mean!, 'open', 'closed', 'square')}`}
+                  ariaLabel={`${clubLabel(c.club)}: club path ${describeSigned(c.path.mean!, 'in-to-out', 'out-to-in', 'neutral')}, face ${describeSigned(c.face.mean!, 'open', 'closed', 'square')}`}
                   type={faceType(c.club)}
                   clubPath={c.path.mean!}
                   faceAngle={c.face.mean!}
                   exaggeration={exaggeration}
                 />
                 <dl className="delivery-stats">
-                  <Stat cls="key-path" label="Club path" s={c.path} words={['in-to-out', 'out-to-in', 'neutral']} />
-                  <Stat cls="key-face" label="Face angle" s={c.face} words={['open', 'closed', 'square']} />
-                  <Stat label="Face to path" s={c.faceToPath} words={['open', 'closed', 'square']} />
+                  <DeliveryStat cls="key-path" label="Club path" s={c.path} words={['in-to-out', 'out-to-in', 'neutral']} />
+                  <DeliveryStat cls="key-face" label="Face angle" s={c.face} words={['open', 'closed', 'square']} />
+                  <DeliveryStat label="Face to path" s={c.faceToPath} words={['open', 'closed', 'square']} />
                 </dl>
                 {c.curve.n > 0 && <CurveBar s={c.curve} max={maxCurve} />}
               </>
@@ -85,37 +87,11 @@ export function FaceControl({ shots }: { shots: Shot[] }) {
   )
 }
 
-function Stat({
-  cls,
-  label,
-  s,
-  unit = '°',
-  words,
-}: {
-  cls?: string
-  label: string
-  s: Summary
-  unit?: string
-  words: [string, string, string]
-}) {
-  return (
-    <div>
-      <dt>
-        {cls && <span className={`key key-arrow ${cls}`} />} {label}
-      </dt>
-      <dd>
-        {describe(s.mean!, ...words, unit)}
-        {s.sd !== undefined && <span className="sd"> ±{fmtNum(s.sd, 1)}</span>}
-      </dd>
-    </div>
-  )
-}
-
 /** Average curve as a bar growing left or right from the centre, with the figure on the other side. */
 function CurveBar({ s, max }: { s: Summary; max: number }) {
   const v = s.mean!
   const right = v >= 0
-  const text = describe(v, 'right', 'left', 'straight', ' m')
+  const text = describeSigned(v, 'right', 'left', 'straight', ' m')
   // Half the track, less room for the arrowhead, is the largest average curve of any club shown.
   const share = max > 0 ? Math.abs(v) / max : 0
   return (
@@ -134,11 +110,4 @@ function CurveBar({ s, max }: { s: Summary; max: number }) {
       </div>
     </div>
   )
-}
-
-/** "2.3° open" / "−2.3° closed": signed value plus the word for its direction (positive = right of target). */
-function describe(v: number, positive: string, negative: string, zero: string, unit = '°'): string {
-  const r = Math.round(v * 10) / 10
-  if (r === 0) return `0.0${unit} ${zero}`
-  return `${r < 0 ? '−' : ''}${fmtNum(Math.abs(r), 1)}${unit} ${r > 0 ? positive : negative}`
 }
