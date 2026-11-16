@@ -36,7 +36,8 @@ export function ClubDelivery({ ariaLabel, type, clubPath, faceAngle, exaggeratio
       </g>
 
       <g transform={`rotate(${face} ${BX} ${BY}) translate(${BX} ${BY + BALL_R + 1})`}>
-        <line className="delivery-shaft" x1={-19} y1={7} x2={-78} y2={11} />
+        {/* Shaft in line with the face: its leading edge sits on the face line (y = 0), not behind it. */}
+        <line className="delivery-shaft" x1={-19} y1={2} x2={-78} y2={4} />
         <path className="delivery-head" d={headPath(type)} />
       </g>
 
