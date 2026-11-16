@@ -546,6 +546,11 @@ select {
   stroke-width: 1.5;
 }
 
+.shaft {
+  stroke: var(--axis);
+  stroke-opacity: 0.55;
+}
+
 .groove {
   stroke: var(--axis);
   stroke-width: 0.75;
@@ -765,6 +770,19 @@ th.sortable button {
 .impact-facet {
   justify-self: center;
   width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.impact-facet figcaption {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.impact-facet figcaption strong {
+  font-size: 15px;
 }
 
 .fit {
