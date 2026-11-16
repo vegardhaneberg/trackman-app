@@ -140,20 +140,31 @@
   log(`Innlogget mot ${auth.endpoint} (${auth.token ? 'token' : 'cookie'}).`);
 
   // ---------- 2. GraphQL-klient som tåler felt Trackman har fjernet ----------
-  const removedFields = new Set();
+  // Fjernede felt huskes per utvalg (f.eks. «course»), ikke globalt: et felt som mangler på én
+  // målingstype skal ikke forsvinne fra de andre. fields() merker hver linje med `# sel:<navn>`,
+  // og feilens linjenummer forteller hvilket utvalg feltet sto i.
+  const removedFields = new Set(); // «<utvalg>:<felt>», eller «*:<felt>» hvis utvalget er ukjent
   async function gql(buildQuery, variables = {}, attempt = 0) {
-    const res = await post(auth, buildQuery(), variables);
+    const query = buildQuery();
+    const res = await post(auth, query, variables);
     if (res.status === 401) throw new Error('Innloggingen er utløpt. Last portalen på nytt og kjør scriptet igjen.');
     if (!res.ok) throw new Error(`API-feil: HTTP ${res.status}`);
     const body = await res.json();
     if (body.errors?.length) {
       // Hvis et felt ikke finnes lenger: fjern det og prøv igjen.
+      const lines = query.split('\n');
       const unknown = body.errors
-        .map((e) => /Cannot query field "(\w+)"/.exec(e.message || '')?.[1])
+        .map((e) => {
+          const field = /Cannot query field "(\w+)"/.exec(e.message || '')?.[1];
+          if (!field) return null;
+          const line = lines[(e.locations?.[0]?.line ?? 0) - 1] || '';
+          const sel = /# sel:(\S+)/.exec(line)?.[1] || '*';
+          return `${sel}:${field}`;
+        })
         .filter(Boolean);
       if (unknown.length && attempt < 15) {
-        const fresh = unknown.filter((f) => !removedFields.has(f));
-        fresh.forEach((f) => removedFields.add(f));
+        const fresh = unknown.filter((k) => !removedFields.has(k));
+        fresh.forEach((k) => removedFields.add(k));
         if (fresh.length) log('Hopper over felt som ikke finnes i API-et:', fresh.join(', '));
         return gql(buildQuery, variables, attempt + 1);
       }
@@ -162,7 +173,10 @@
     }
     return body.data;
   }
-  const fields = (list) => list.filter((f) => !removedFields.has(f)).join(' ');
+  const fields = (list, sel) => {
+    const kept = list.filter((f) => !removedFields.has(`${sel}:${f}`) && !removedFields.has(`*:${f}`));
+    return `\n${kept.join(' ')} # sel:${sel}\n`; // kommentaren må stå alene ut linjen
+  };
 
   // ---------- 3. Feltlister (fra kjent skjema, pluss noen ekstra som fjernes automatisk om de ikke finnes) ----------
   const RANGE_MEAS = ['ballSpeed', 'carry', 'total', 'carrySide', 'totalSide', 'launchAngle', 'launchDirection',
@@ -173,7 +187,8 @@
     'carrySide', 'totalSide', 'landingAngle', 'maxHeight', 'hangTime'];
   const COURSE_MEAS = ['ballSpeed', 'clubSpeed', 'smashFactor', 'carry', 'total', 'launchAngle', 'launchDirection',
     'spinRate', 'spinAxis', 'curve', 'carrySide', 'totalSide', 'landingAngle', 'maxHeight', 'hangTime',
-    'attackAngle', 'clubPath', 'faceAngle', 'faceToPath', 'dynamicLoft'];
+    'attackAngle', 'clubPath', 'faceAngle', 'faceToPath', 'dynamicLoft', 'spinLoft', 'swingPlane', 'swingDirection',
+    'dynamicLie', 'impactOffset', 'impactHeight', 'lowPointDistance'];
   const SESSION_TYPES = ['MapMyBagSessionActivity', 'ShotAnalysisSessionActivity', 'SimulatorSessionActivity',
     'VirtualRangeSessionActivity', 'SessionActivity'];
 
@@ -194,6 +209,19 @@
       }
     }`;
 
+  // `strokes` får et eget alias per aktivitetstype: slagtypene har ulik nullbarhet på samme felt
+  // (f.eks. `time: DateTime` mot `DateTime!`), og da avviser API-et spørringen hvis de deler navn.
+  // normalizeNode() samler dem tilbake til `strokes`.
+  function normalizeNode(node) {
+    if (!node) return null;
+    for (const key of Object.keys(node)) {
+      if (!key.startsWith('strokes_')) continue;
+      if (node[key] != null) node.strokes = node[key];
+      delete node[key];
+    }
+    return node;
+  }
+
   const DETAIL_QUERY = () => `
     query Activity($id: ID!) {
       node(id: $id) {
@@ -201,13 +229,13 @@
         ... on PlayerActivity { id time kind }
         ... on RangePracticeActivity {
           location { name }
-          strokes { time club bayName measurement { ${fields(RANGE_MEAS)} } }
+          strokes_RangePractice: strokes { time club bayName measurement { ${fields(RANGE_MEAS, 'range')} } }
         }
         ... on RangeFindMyDistanceActivity {
           location { name }
-          strokes { time club measurement { ${fields(RANGE_MEAS)} } }
+          strokes_RangeFindMyDistance: strokes { time club measurement { ${fields(RANGE_MEAS, 'findMyDistance')} } }
         }
-        ${SESSION_TYPES.map((t) => `... on ${t} { strokes { time club measurement { ${fields(FULL_MEAS)} } } }`).join('\n')}
+        ${SESSION_TYPES.map((t) => `... on ${t} { strokes_${t}: strokes { time club measurement { ${fields(FULL_MEAS, t)} } } }`).join('\n')}
         ... on CoursePlayActivity {
           gameType grossScore netScore toPar
           course { displayName }
@@ -215,7 +243,7 @@
             par grossScore netScore toPar courseHcp teeName numberOfHolesPlayed isCompleted
             holes {
               holeNumber par strokeIndex distance grossScore netScore putts greenInRegulation hcpStrokes
-              shots { shotNumber club total launchLie finalLie shotResult measurement { ${fields(COURSE_MEAS)} } }
+              shots { shotNumber club total launchLie finalLie shotResult measurement { ${fields(COURSE_MEAS, 'course')} } }
             }
           }
         }
@@ -246,7 +274,7 @@
     const worker = async () => {
       while (todo.length) {
         const id = todo.shift();
-        try { detailCache.set(id, (await gql(DETAIL_QUERY, { id }))?.node || null); }
+        try { detailCache.set(id, normalizeNode((await gql(DETAIL_QUERY, { id }))?.node)); }
         catch (e) { console.warn('[Trackman-eksport] Klarte ikke å hente', id, e); detailCache.set(id, null); }
         onProgress(++done, ids.length);
       }

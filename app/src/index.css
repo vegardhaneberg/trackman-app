@@ -11,6 +11,7 @@
   --series: #2a78d6;
   --series-wash: rgba(42, 120, 214, 0.12);
   --highlight: #eb6834;
+  --good: #2f9e5e;
   --face: #f0efec;
   --error: #d03b3b;
   --radius: 10px;
@@ -31,6 +32,7 @@
     --series: #3987e5;
     --series-wash: rgba(57, 135, 229, 0.16);
     --highlight: #d95926;
+    --good: #3fae6c;
     --face: #262624;
   }
 }
@@ -546,6 +548,11 @@ select {
   stroke-width: 1.5;
 }
 
+.shaft {
+  stroke: var(--axis);
+  stroke-opacity: 0.55;
+}
+
 .groove {
   stroke: var(--axis);
   stroke-width: 0.75;
@@ -765,6 +772,19 @@ th.sortable button {
 .impact-facet {
   justify-self: center;
   width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.impact-facet figcaption {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.impact-facet figcaption strong {
+  font-size: 15px;
 }
 
 .fit {
@@ -849,4 +869,293 @@ pre.code {
   border: 1px solid var(--border);
   border-radius: 8px;
   font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Face control */
+.delivery-grid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.delivery {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.delivery-target {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.delivery-ground {
+  stroke: var(--axis);
+  stroke-width: 1.5;
+}
+
+.delivery-good {
+  fill: none;
+  stroke: var(--good);
+  stroke-opacity: 0.8;
+  stroke-width: 16;
+}
+
+.delivery-low {
+  fill: var(--ink-2);
+}
+
+.delivery-tee {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.delivery-arc {
+  fill: none;
+  stroke: var(--axis);
+  stroke-width: 1;
+}
+
+.delivery-head {
+  fill: var(--ink);
+}
+
+.delivery-shaft {
+  stroke: var(--ink-2);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.delivery-ball {
+  fill: var(--surface);
+  stroke: var(--ink-2);
+  stroke-width: 1.25;
+}
+
+.delivery-path line,
+.delivery-face line {
+  stroke-width: 4;
+}
+
+.delivery-path {
+  stroke: var(--series);
+  fill: var(--series);
+}
+
+.delivery-face {
+  stroke: var(--highlight);
+  fill: var(--highlight);
+}
+
+.delivery-path polygon,
+.delivery-face polygon {
+  stroke: none;
+}
+
+.delivery-stats {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.delivery-stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+
+.delivery-stats dt {
+  color: var(--ink-2);
+}
+
+.delivery-stats dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.delivery-stats .sd {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.key-arrow {
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.key-path {
+  background: var(--series);
+}
+
+.key-face {
+  background: var(--highlight);
+}
+
+.key-good {
+  background: var(--good);
+}
+
+.key-low {
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  border-top-width: 0;
+  border-bottom: 8px solid var(--ink-2);
+  background: none;
+}
+
+.curve-bar {
+  margin-top: 6px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.curve-title {
+  color: var(--ink-2);
+}
+
+.curve-track {
+  position: relative;
+  height: 22px;
+  margin-top: 2px;
+}
+
+.curve-fill {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  min-width: 2px;
+  background: var(--axis);
+}
+
+/* Arrowhead just past the tip of the bar. */
+.curve-fill::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 7px solid transparent;
+  border-left-width: 9px;
+  border-right-width: 9px;
+}
+
+.curve-fill.right::after {
+  left: 100%;
+  border-right-width: 0;
+  border-left-color: var(--axis);
+}
+
+.curve-fill.left::after {
+  right: 100%;
+  border-left-width: 0;
+  border-right-color: var(--axis);
+}
+
+.curve-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--muted);
+}
+
+.curve-value {
+  position: absolute;
+  top: 0;
+  padding: 0 8px;
+  line-height: 22px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.curve-value .sd {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 11px;
+}
+
+/* Ball flight */
+.flight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.flight {
+  display: block;
+  overflow: visible;
+}
+
+.flight-ground {
+  stroke: var(--axis);
+  stroke-width: 1.5;
+}
+
+.flight-shot {
+  fill: none;
+  stroke: var(--series);
+  stroke-width: 1;
+  opacity: 0.14;
+}
+
+.flight-mean {
+  fill: none;
+  stroke: var(--series);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.flight-dot {
+  fill: var(--surface);
+  stroke: var(--series);
+  stroke-width: 2;
+}
+
+.flight-label {
+  fill: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+}
+
+.flight-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px 16px;
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.flight-stats dt {
+  color: var(--ink-2);
+  font-size: 12px;
+}
+
+.flight-stats dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.flight-stats .sd {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.key-shot {
+  height: 2px;
+  background: var(--series);
+  opacity: 0.4;
 }

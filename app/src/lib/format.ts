@@ -1,3 +1,5 @@
+import { fmtNum } from './metrics'
+
 const KIND_LABELS: Record<string, string> = {
   SIMULATOR: 'Round',
   VIRTUAL_RANGE: 'Range',
@@ -19,4 +21,11 @@ export function fmtShortDate(d: Date | string): string {
 
 export function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
+/** "2.3° open" / "−2.3° closed": signed value plus the word for its direction. */
+export function describeSigned(v: number, positive: string, negative: string, zero: string, unit = '°'): string {
+  const r = Math.round(v * 10) / 10
+  if (r === 0) return `0.0${unit} ${zero}`.trim()
+  return `${r < 0 ? '−' : ''}${fmtNum(Math.abs(r), 1)}${unit} ${r > 0 ? positive : negative}`.trim()
 }

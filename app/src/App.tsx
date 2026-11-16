@@ -4,9 +4,12 @@ import { clearShots, deleteSession, loadSetting, loadShots, mergeShots, saveSett
 import { parseTrackmanCsv } from './lib/parse'
 import { applyFilters, sessionsOf } from './lib/stats'
 import { DEFAULT_FILTERS, type Filters, type Shot, type Tab } from './lib/types'
+import { AttackLaunch } from './views/AttackLaunch'
+import { BallFlight } from './views/BallFlight'
 import { Dispersion } from './views/Dispersion'
 import { ExportGuide } from './views/ExportGuide'
 import { Explorer } from './views/Explorer'
+import { FaceControl } from './views/FaceControl'
 import { Impact } from './views/Impact'
 import { Overview } from './views/Overview'
 import { Shots } from './views/Shots'
@@ -17,6 +20,9 @@ const TABS: [Tab, string][] = [
   ['overview', 'Overview'],
   ['dispersion', 'Dispersion'],
   ['impact', 'Impact'],
+  ['face', 'Face and path'],
+  ['attack', 'Attack and launch'],
+  ['flight', 'Ball flight'],
   ['trends', 'Trends'],
   ['explorer', 'Explorer'],
   ['shots', 'Shots'],
@@ -62,12 +68,12 @@ export default function App() {
       let parsed: Shot[] = []
       for (const file of files) parsed = parsed.concat(parseTrackmanCsv(await file.text()))
       const before = new Set((shots ?? []).map((s) => s.activityId))
-      const added = await mergeShots(parsed)
+      const { added, updated } = await mergeShots(parsed)
       const all = await loadShots()
       const newSessions = sessionsOf(all).filter((s) => !before.has(s.id)).length
       setShots(all)
       setMessage({
-        text: `Imported ${added} new shots in ${newSessions} new sessions. ${parsed.length - added} already stored shots were skipped.`,
+        text: `Imported ${added} new shots in ${newSessions} new sessions and updated ${updated} already stored shots.`,
       })
     } catch (e) {
       setMessage({ text: e instanceof Error ? e.message : String(e), error: true })
@@ -197,6 +203,9 @@ export default function App() {
                     <StrikeCarry shots={filtered} />
                   </div>
                 )}
+                {tab === 'face' && <FaceControl shots={filtered} />}
+                {tab === 'attack' && <AttackLaunch shots={filtered} />}
+                {tab === 'flight' && <BallFlight shots={filtered} />}
                 {tab === 'trends' && <Trends shots={filtered} />}
                 {tab === 'explorer' && <Explorer shots={filtered} />}
                 {tab === 'shots' && <Shots shots={filtered} />}

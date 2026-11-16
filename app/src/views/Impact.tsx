@@ -1,4 +1,4 @@
-import { faceDomain, facePath, grooves } from '../charts/faceShapes'
+import { faceDomain, facePath, faceShaft, grooves } from '../charts/faceShapes'
 import { Scatter, type Pt } from '../charts/Scatter'
 import { ShotTooltip } from '../charts/Tooltip'
 import { useWidth } from '../charts/useWidth'
@@ -6,9 +6,11 @@ import { clubLabel, faceType } from '../lib/clubs'
 import { byClub, summarize, values } from '../lib/stats'
 import type { Shot } from '../lib/types'
 
-// Large faces: two per row on a typical desktop, one on narrow screens.
-const MIN_FACET = 460
-const MAX_FACET = 820
+// Two or three faces per row on a typical desktop, one on narrow screens.
+const MIN_FACET = 380
+const MAX_FACET = 600
+// Each club sits in its own bordered tile; the chart is narrower than the tile by its padding and border.
+const TILE_INSET = 2 * 14 + 2
 
 /** Where on the face each shot hit, one face per club, all at the same mm scale. */
 export function Impact({ shots }: { shots: Shot[] }) {
@@ -23,7 +25,7 @@ export function Impact({ shots }: { shots: Shot[] }) {
       <header className="card-head">
         <h2>Impact location</h2>
         <p className="muted">
-          Viewed from the front, right-handed: heel left, toe right. Ellipse = 1 standard deviation, ring = average.
+          Viewed from the front, right-handed: toe left, heel right. Ellipse = 1 standard deviation, ring = average.
           Hollow dots are off the drawn face. Each face is scaled to fill its chart; compare clubs using the mm
           figures.
         </p>
@@ -34,8 +36,10 @@ export function Impact({ shots }: { shots: Shot[] }) {
             const ss = all.filter((s) => s.v.impactOffset !== undefined && s.v.impactHeight !== undefined)
             const type = faceType(club)
             const dom = faceDomain(type)
+            const sh = faceShaft(type)
             // Equal mm-per-pixel horizontally and vertically, so the face isn't distorted.
-            const facetH = Math.round(((facetW - 12) * (dom.y[1] - dom.y[0])) / (dom.x[1] - dom.x[0])) + 12
+            const chartW = facetW - TILE_INSET
+            const facetH = Math.round(((chartW - 12) * (dom.y[1] - dom.y[0])) / (dom.x[1] - dom.x[0])) + 12
             const off = summarize(values(ss, 'impactOffset'))
             const hgt = summarize(values(ss, 'impactHeight'))
             const pts: Pt[] = ss.map((s) => ({ id: s.id, x: s.v.impactOffset!, y: s.v.impactHeight!, shot: s }))
@@ -56,24 +60,34 @@ export function Impact({ shots }: { shots: Shot[] }) {
                       ariaLabel={`${clubLabel(club)} impact locations`}
                       bare
                       points={pts}
-                      width={facetW}
+                      width={chartW}
                       height={facetH}
-                      xDomain={dom.x}
+                      xDomain={[dom.x[1], dom.x[0]]}
                       yDomain={dom.y}
                       showEllipse={ss.length >= 3}
-                      dotRadius={facetW > 500 ? 5.5 : 4}
+                      dotRadius={chartW > 500 ? 5.5 : 4}
                       background={(sx, sy) => (
                         <g>
+                          {sh && (
+                            <line
+                              className="shaft"
+                              x1={sx(sh.from[0])}
+                              y1={sy(sh.from[1])}
+                              x2={sx(sh.to[0])}
+                              y2={sy(sh.to[1])}
+                              strokeWidth={Math.abs(sx(sh.width) - sx(0))}
+                            />
+                          )}
                           <path className="face" d={facePath(type, sx, sy)} />
-                          {grooves(type).map((y) => (
-                            <line key={y} className="groove" x1={sx(-26)} x2={sx(26)} y1={sy(y)} y2={sy(y)} />
+                          {grooves(type).map((g) => (
+                            <line key={g.y} className="groove" x1={sx(g.x1)} x2={sx(g.x2)} y1={sy(g.y)} y2={sy(g.y)} />
                           ))}
                           <line className="center" x1={sx(-5)} x2={sx(5)} y1={sy(0)} y2={sy(0)} />
                           <line className="center" x1={sx(0)} x2={sx(0)} y1={sy(-5)} y2={sy(5)} />
-                          <text className="tick" x={sx(dom.x[0]) + 2} y={sy(dom.y[0]) - 4}>
+                          <text className="tick" x={sx(dom.x[0]) - 2} y={sy(dom.y[0]) - 4} textAnchor="end">
                             Heel
                           </text>
-                          <text className="tick" x={sx(dom.x[1]) - 2} y={sy(dom.y[0]) - 4} textAnchor="end">
+                          <text className="tick" x={sx(dom.x[1]) + 2} y={sy(dom.y[0]) - 4}>
                             Toe
                           </text>
                         </g>
