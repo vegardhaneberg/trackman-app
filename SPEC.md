@@ -12,7 +12,7 @@ Trackman CSV export (UTF-8 with BOM, comma-separated). Columns used:
 
 Facts from the sample file (979 rows, 14 activities; 544 unique non-putt shots after de-duplication):
 
-- Units are metric: speeds m/s, distances m, impact offset/height in **meters** (displayed as mm).
+- Export units are metric: speeds m/s (converted to and shown in mph), distances m, impact offset/height in **meters** (displayed as mm).
 - `activity_kind` ∈ `SIMULATOR`, `VIRTUAL_RANGE`, `COURSE_PLAY`, `MAP_MY_BAG`.
 - Many fields are sparse (club speed and impact location are missing on a large share of shots). Empty cell = missing, never 0.
 - `swingPlane`, `swingDirection`, `dynamicLie`, `bay` are always empty — ignored.

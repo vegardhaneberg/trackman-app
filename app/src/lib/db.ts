@@ -1,4 +1,5 @@
 import { openDB, type DBSchema } from 'idb'
+import { MPS_TO_MPH } from './metrics'
 import { dropCourseCopies } from './parse'
 import type { Filters, Shot, Tab } from './types'
 
@@ -12,11 +13,24 @@ interface TrackmanDB extends DBSchema {
   settings: { key: string; value: Settings[keyof Settings] }
 }
 
-const dbPromise = openDB<TrackmanDB>('trackman-visualizer', 1, {
-  upgrade(db) {
-    const shots = db.createObjectStore('shots', { keyPath: 'id' })
-    shots.createIndex('activityId', 'activityId')
-    db.createObjectStore('settings')
+const dbPromise = openDB<TrackmanDB>('trackman-visualizer', 2, {
+  async upgrade(db, oldVersion, _newVersion, tx) {
+    if (oldVersion < 1) {
+      const shots = db.createObjectStore('shots', { keyPath: 'id' })
+      shots.createIndex('activityId', 'activityId')
+      db.createObjectStore('settings')
+    }
+    // v2: speeds are stored in mph instead of m/s.
+    if (oldVersion === 1) {
+      let cursor = await tx.objectStore('shots').openCursor()
+      while (cursor) {
+        const { v } = cursor.value
+        if (v.clubSpeed !== undefined) v.clubSpeed *= MPS_TO_MPH
+        if (v.ballSpeed !== undefined) v.ballSpeed *= MPS_TO_MPH
+        await cursor.update(cursor.value)
+        cursor = await cursor.continue()
+      }
+    }
   },
 })
 
@@ -39,18 +53,28 @@ export async function loadShots(): Promise<Shot[]> {
 }
 
 /**
- * Adds shots whose id isn't stored yet, then de-duplicates course-round copies across the whole
- * store (a round's two copies may arrive in different uploads). Returns how many new shots remain.
+ * Adds new shots and replaces stored shots with the same id (so re-importing picks up fields a
+ * newer export added), then de-duplicates course-round copies across the whole store (a round's
+ * two copies may arrive in different uploads). Returns how many incoming shots were added or updated.
  */
-export async function mergeShots(shots: Shot[]): Promise<number> {
+export async function mergeShots(shots: Shot[]): Promise<{ added: number; updated: number }> {
   const db = await dbPromise
   const stored = await db.getAll('shots')
   const known = new Set(stored.map((s) => s.id))
-  const combined = [...stored, ...shots.filter((s) => !known.has(s.id))]
-  const kept = dropCourseCopies(combined)
+  const byId = new Map(stored.map((s) => [s.id, s]))
+  for (const s of shots) {
+    const old = byId.get(s.id)
+    // A simulator shot's result (putt flag) comes from its course copy, which may not be in this file.
+    if (old && !s.shotResult && old.shotResult) s.shotResult = old.shotResult
+    byId.set(s.id, s)
+  }
+  const kept = dropCourseCopies([...byId.values()])
   const tx = db.transaction('shots', 'readwrite')
   await Promise.all([tx.store.clear(), ...kept.map((s) => tx.store.put(s)), tx.done])
-  return kept.filter((s) => !known.has(s.id)).length
+  const incoming = new Set(shots.map((s) => s.id))
+  const keptIncoming = kept.filter((s) => incoming.has(s.id))
+  const added = keptIncoming.filter((s) => !known.has(s.id)).length
+  return { added, updated: keptIncoming.length - added }
 }
 
 export async function deleteSession(activityId: string): Promise<void> {

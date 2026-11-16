@@ -62,12 +62,12 @@ export default function App() {
       let parsed: Shot[] = []
       for (const file of files) parsed = parsed.concat(parseTrackmanCsv(await file.text()))
       const before = new Set((shots ?? []).map((s) => s.activityId))
-      const added = await mergeShots(parsed)
+      const { added, updated } = await mergeShots(parsed)
       const all = await loadShots()
       const newSessions = sessionsOf(all).filter((s) => !before.has(s.id)).length
       setShots(all)
       setMessage({
-        text: `Imported ${added} new shots in ${newSessions} new sessions. ${parsed.length - added} already stored shots were skipped.`,
+        text: `Imported ${added} new shots in ${newSessions} new sessions and updated ${updated} already stored shots.`,
       })
     } catch (e) {
       setMessage({ text: e instanceof Error ? e.message : String(e), error: true })

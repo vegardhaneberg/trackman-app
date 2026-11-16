@@ -33,15 +33,18 @@ export interface MetricDef {
   factor?: number
 }
 
-// Units follow the metric Trackman export: m/s, m, degrees, rpm.
+/** m/s -> mph. Speeds arrive in m/s from the Trackman export and are stored in mph. */
+export const MPS_TO_MPH = 2.2369362920544
+
+// Units follow the metric Trackman export (m, degrees, rpm), except speeds, shown in mph.
 export const METRICS: MetricDef[] = [
   { key: 'carry', label: 'Carry', unit: 'm', digits: 1 },
   { key: 'total', label: 'Total', unit: 'm', digits: 1 },
   { key: 'carrySide', label: 'Carry side', unit: 'm', digits: 1 },
   { key: 'totalSide', label: 'Total side', unit: 'm', digits: 1 },
   { key: 'curve', label: 'Curve', unit: 'm', digits: 1 },
-  { key: 'clubSpeed', label: 'Club speed', unit: 'm/s', digits: 1 },
-  { key: 'ballSpeed', label: 'Ball speed', unit: 'm/s', digits: 1 },
+  { key: 'clubSpeed', label: 'Club speed', unit: 'mph', digits: 1, factor: MPS_TO_MPH },
+  { key: 'ballSpeed', label: 'Ball speed', unit: 'mph', digits: 1, factor: MPS_TO_MPH },
   { key: 'smashFactor', label: 'Smash factor', unit: '', digits: 2 },
   { key: 'launchAngle', label: 'Launch angle', unit: '°', digits: 1 },
   { key: 'launchDirection', label: 'Launch direction', unit: '°', digits: 1 },
