@@ -115,8 +115,7 @@ h2 {
 button.primary,
 button.ghost,
 a.button.ghost,
-.dd-trigger,
-.chip {
+.dd-trigger {
   border-radius: 8px;
   padding: 6px 12px;
   border: 1px solid var(--border);
@@ -131,8 +130,7 @@ button.primary {
 
 button.ghost:hover,
 a.button.ghost:hover,
-.dd-trigger:hover,
-.chip:hover {
+.dd-trigger:hover {
   background: var(--grid);
 }
 
@@ -204,27 +202,100 @@ a.button.ghost:hover,
   padding-bottom: 10px;
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.month-range {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.chip {
-  border-radius: 999px;
-  color: var(--muted);
-}
-
-.chip[aria-pressed='true'] {
-  color: var(--ink);
-  border-color: var(--ink-2);
-  font-weight: 500;
-}
-
-.chip .count {
-  color: var(--muted);
-  font-weight: 400;
+.month-label {
+  min-width: 15ch;
   font-variant-numeric: tabular-nums;
+}
+
+/* Two range inputs stacked on one track; only the thumbs take pointer events. */
+.month-slider {
+  position: relative;
+  width: 180px;
+  height: 20px;
+}
+
+.month-slider::before,
+.month-slider::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.month-slider::before {
+  left: 0;
+  right: 0;
+  background: var(--grid);
+}
+
+/* The thumbs travel between 8px and 100% - 8px, so the fill is inset to match. */
+.month-slider::after {
+  left: calc(8px + (100% - 16px) * var(--lo));
+  right: calc(8px + (100% - 16px) * (1 - var(--hi)));
+  background: var(--series);
+}
+
+.month-slider input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.month-slider input::-webkit-slider-runnable-track {
+  background: none;
+}
+
+.month-slider input::-moz-range-track {
+  background: none;
+}
+
+.month-slider input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--series);
+  cursor: grab;
+}
+
+.month-slider input::-moz-range-thumb {
+  pointer-events: auto;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--series);
+  cursor: grab;
+}
+
+.month-slider input:focus-visible {
+  outline: none;
+}
+
+.month-slider input:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--series-wash);
+}
+
+.month-slider input:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px var(--series-wash);
 }
 
 .check {
@@ -1158,4 +1229,127 @@ pre.code {
   height: 2px;
   background: var(--series);
   opacity: 0.4;
+}
+
+.flight-good {
+  fill: var(--good);
+  opacity: 0.14;
+}
+
+.key-band {
+  width: 16px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--good);
+  opacity: 0.4;
+}
+
+/* Window and stopping power */
+.window-summary {
+  margin-bottom: 20px;
+}
+
+.window {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--muted);
+  border-radius: 6px;
+}
+
+.window-good {
+  border-left-color: var(--good);
+}
+
+.window-borderline {
+  border-left-color: var(--highlight);
+}
+
+.window-poor {
+  border-left-color: var(--error);
+}
+
+.window-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0 0 8px;
+}
+
+.window-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px 16px;
+  margin: 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.window-stats dt {
+  color: var(--ink-2);
+  font-size: 12px;
+}
+
+.window-stats dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.window-stats .sd {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.window-stats .window-target {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.window-advice {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--ink-2);
+}
+
+.window-advice li + li {
+  margin-top: 2px;
+}
+
+.level,
+.verdict {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.verdict {
+  margin-left: 0;
+}
+
+.level-ok,
+.verdict-good {
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+}
+
+.level-low,
+.level-bad,
+.verdict-poor {
+  color: var(--error);
+  background: color-mix(in srgb, var(--error) 12%, transparent);
+}
+
+.level-high,
+.level-warn,
+.verdict-borderline {
+  color: var(--highlight);
+  background: color-mix(in srgb, var(--highlight) 14%, transparent);
 }

@@ -1,5 +1,6 @@
 import { deviation, mean, median, quantileSorted } from 'd3-array'
 import { isPutt, sortClubs } from './clubs'
+import { monthKey } from './format'
 import type { MetricKey } from './metrics'
 import type { Filters, Session, Shot } from './types'
 
@@ -55,6 +56,12 @@ export function sessionsOf(shots: Shot[]): Session[] {
     .sort((a, b) => b.time.localeCompare(a.time))
 }
 
+export function inMonthRange(s: Shot, f: Filters): boolean {
+  if (!f.fromMonth && !f.toMonth) return true
+  const m = monthKey(s.activityTime)
+  return (!f.fromMonth || m >= f.fromMonth) && (!f.toMonth || m <= f.toMonth)
+}
+
 export function applyFilters(shots: Shot[], f: Filters): Shot[] {
   const kinds = new Set(f.excludedKinds)
   const sessions = new Set(f.excludedSessions)
@@ -63,6 +70,7 @@ export function applyFilters(shots: Shot[], f: Filters): Shot[] {
     (s) =>
       !isPutt(s.shotResult, s.club) &&
       !kinds.has(s.kind) &&
+      inMonthRange(s, f) &&
       !sessions.has(s.activityId) &&
       !clubs.has(s.club),
   )

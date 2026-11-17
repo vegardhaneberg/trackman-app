@@ -15,6 +15,33 @@ export function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+/** Calendar month of a timestamp in local time, 'YYYY-MM' (sorts as text). */
+export function monthKey(iso: string): string {
+  const d = new Date(iso)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+/** Every month from the first to the last, inclusive. */
+export function monthsBetween(first: string, last: string): string[] {
+  const out: string[] = []
+  let [y, m] = first.split('-').map(Number)
+  while (out.length < 1200) {
+    const key = `${y}-${String(m).padStart(2, '0')}`
+    if (key > last) break
+    out.push(key)
+    if (++m > 12) {
+      m = 1
+      y++
+    }
+  }
+  return out
+}
+
+export function fmtMonth(key: string): string {
+  const [y, m] = key.split('-').map(Number)
+  return new Date(y, m - 1, 1).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+}
+
 export function fmtShortDate(d: Date | string): string {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
