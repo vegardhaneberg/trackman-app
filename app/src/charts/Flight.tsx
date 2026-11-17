@@ -19,10 +19,12 @@ interface Props {
   /** Extent of the axes in m, shared by every club so the charts compare. */
   maxCarry: number
   maxHeight: number
+  /** Good max height range in m, drawn as a band. */
+  goodHeight?: [number, number]
 }
 
 /** Side view of a club's ball flight, height against distance at the same scale, target to the right. */
-export function Flight({ ariaLabel, mean, shots, maxCarry, maxHeight }: Props) {
+export function Flight({ ariaLabel, mean, shots, maxCarry, maxHeight, goodHeight }: Props) {
   const [ref, width] = useWidth<HTMLDivElement>()
   const iw = Math.max(width - M.left - M.right, 10)
   const k = iw / maxCarry // px per m, both directions
@@ -55,6 +57,15 @@ export function Flight({ ariaLabel, mean, shots, maxCarry, maxHeight }: Props) {
                 </text>
               ))}
             </g>
+            {goodHeight && (
+              <rect
+                className="flight-good"
+                x={0}
+                y={sy(goodHeight[1])}
+                width={iw}
+                height={sy(goodHeight[0]) - sy(goodHeight[1])}
+              />
+            )}
             <line className="flight-ground" x1={0} x2={iw} y1={ih} y2={ih} />
             {shots.map((s, i) => {
               const d = flightPath(s, k, ih)
@@ -64,14 +75,14 @@ export function Flight({ ariaLabel, mean, shots, maxCarry, maxHeight }: Props) {
               <>
                 <path className="flight-mean" d={meanPath} />
                 <circle className="flight-dot" cx={sx(apex)} cy={sy(mean.maxHeight)} r={3.5} />
-{labels && (
-                                  <text className="flight-label" x={sx(apex)} y={sy(mean.maxHeight) - 8} textAnchor="middle">
+                {labels && (
+                  <text className="flight-label" x={sx(apex)} y={sy(mean.maxHeight) - 8} textAnchor="middle">
                     {fmt('maxHeight', mean.maxHeight)}
                   </text>
                 )}
                 <circle className="flight-dot" cx={sx(mean.carry)} cy={ih} r={3.5} />
-{labels && (
-                                  <text
+                {labels && (
+                  <text
                     className="flight-label"
                     x={sx(mean.carry) + 8}
                     y={ih - 8}

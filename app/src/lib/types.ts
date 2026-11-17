@@ -27,6 +27,9 @@ export interface Filters {
   excludedSessions: string[]
   excludedClubs: string[]
   excludeMishits: boolean
+  /** Inclusive month range, 'YYYY-MM'. null = open-ended, so the range follows new uploads. */
+  fromMonth: string | null
+  toMonth: string | null
 }
 
 export const DEFAULT_FILTERS: Filters = {
@@ -34,6 +37,8 @@ export const DEFAULT_FILTERS: Filters = {
   excludedSessions: [],
   excludedClubs: [],
   excludeMishits: true,
+  fromMonth: null,
+  toMonth: null,
 }
 
 export type Tab = 'overview' | 'dispersion' | 'impact' | 'face' | 'attack' | 'flight' | 'trends' | 'explorer' | 'shots'
